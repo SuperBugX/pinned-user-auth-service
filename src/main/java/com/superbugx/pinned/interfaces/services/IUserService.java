@@ -5,7 +5,7 @@ import com.superbugx.pinned.exceptions.EmailNotUniqueException;
 import com.superbugx.pinned.exceptions.UsernameNotUniqueException;
 import com.superbugx.pinned.models.User;
 
-public interface UserService {
+public interface IUserService {
 	/**
 	 * Create a new User account according to business logic and store into database
 	 * 

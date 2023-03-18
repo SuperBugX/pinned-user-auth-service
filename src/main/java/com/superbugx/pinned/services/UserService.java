@@ -15,14 +15,14 @@ import com.superbugx.pinned.database.repository.UserRepository;
 import com.superbugx.pinned.exceptions.BadUserException;
 import com.superbugx.pinned.exceptions.EmailNotUniqueException;
 import com.superbugx.pinned.exceptions.UsernameNotUniqueException;
-import com.superbugx.pinned.interfaces.services.UserService;
+import com.superbugx.pinned.interfaces.services.IUserService;
 import com.superbugx.pinned.models.User;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserService implements IUserService {
 
 	// Logger
-	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	UserRepository userRepo;

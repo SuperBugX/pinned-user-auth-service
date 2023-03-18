@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.superbugx.pinned.dto.requests.RegisterUserDTO;
 import com.superbugx.pinned.dto.responses.GenericResponse;
-import com.superbugx.pinned.interfaces.services.UserService;
+import com.superbugx.pinned.interfaces.services.IUserService;
 import com.superbugx.pinned.models.User;
 
 @RestController
@@ -30,7 +30,7 @@ public class UserController {
 
 	// Services
 	@Autowired
-	UserService userService;
+	private IUserService userService;
 
 	// POST
 	/**
