@@ -22,10 +22,10 @@ import com.superbugx.pinned.models.User;
 
 @RestController
 @RequestMapping("/account")
-public class AccountController {
+public class UserController {
 
 	// Logger
-	private static Logger logger = LoggerFactory.getLogger(AccountController.class);
+	private static Logger logger = LoggerFactory.getLogger(UserController.class);
 
 	// Services
 	@Autowired
@@ -54,7 +54,7 @@ public class AccountController {
 		GenericResponse<String> response = new GenericResponse<String>(newId);
 
 		// Add HATEOAS links
-		Link deleteLink = linkTo(methodOn(AccountController.class).delete(newId)).withRel("delete");
+		Link deleteLink = linkTo(methodOn(UserController.class).delete(newId)).withRel("delete");
 		response.add(deleteLink);
 
 		// Return response
