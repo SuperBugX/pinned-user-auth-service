@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.superbugx.pinned.dto.requests.RegisterUserDTO;
+import com.superbugx.pinned.dto.responses.GenericResponse;
 import com.superbugx.pinned.interfaces.services.UserService;
-import com.superbugx.pinned.models.GenericResponse;
 import com.superbugx.pinned.models.User;
 
 @RestController
@@ -36,16 +37,21 @@ public class UserController {
 	 * Create a new user account based on JSON input. Only the Email, UserName, and
 	 * password fields are considered.
 	 * 
-	 * @param newUser - JSON input which is a 1:1 representation of the User model
+	 * @param newUserDTO - JSON input which is a 1:1 representation of the RegisterUserDTO
 	 * @return - new user ID
 	 * @throws EmailNotUniqueException
 	 * @throws UsernameNotUniqueException
 	 * @throws UsernameNotUniqueException
 	 */
 	@PostMapping(value = "/register", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<GenericResponse<String>> register(@RequestBody User newUser) throws Exception {
-
+	public ResponseEntity<GenericResponse<String>> register(@RequestBody RegisterUserDTO newUserDTO) throws Exception {
 		logger.info("User Register Request Received");
+		
+		//Convert DTO to Model
+		User newUser = new User();
+		newUser.setEmail(newUserDTO.getEmail());
+		newUser.setPassword(newUser.getPassword());
+		newUser.setUsername(newUser.getUsername());
 
 		// Attempt to register the new user
 		String newId = userService.register(newUser);

@@ -1,4 +1,4 @@
-package com.superbugx.pinned.models;
+package com.superbugx.pinned.dto.responses;
 
 import org.springframework.hateoas.EntityModel;
 
