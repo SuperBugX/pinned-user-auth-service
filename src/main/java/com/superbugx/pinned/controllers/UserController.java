@@ -46,12 +46,12 @@ public class UserController {
 	@PostMapping(value = "/register", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<GenericResponse<String>> register(@RequestBody RegisterUserDTO newUserDTO) throws Exception {
 		logger.info("User Register Request Received");
-		
-		//Convert DTO to Model
+
+		// Convert DTO to Model
 		User newUser = new User();
 		newUser.setEmail(newUserDTO.getEmail());
-		newUser.setPassword(newUser.getPassword());
-		newUser.setUsername(newUser.getUsername());
+		newUser.setPassword(newUserDTO.getPassword());
+		newUser.setUsername(newUserDTO.getUsername());
 
 		// Attempt to register the new user
 		String newId = userService.register(newUser);
@@ -76,9 +76,9 @@ public class UserController {
 	 */
 	@DeleteMapping(value = "/delete/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<GenericResponse<Boolean>> delete(@PathVariable String id) throws Exception {
-		
+
 		logger.info("User Delete Request Received");
-		
+
 		// Delete user
 		boolean result = userService.delete(id);
 

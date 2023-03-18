@@ -9,7 +9,7 @@ public interface IUserService {
 	/**
 	 * Create a new User account according to business logic and store into database
 	 * 
-	 * @param newUser - A User object with at least Email, Password, and UserName values not null
+	 * @param newUser - User object with Email, Password, and UserName values not null
 	 * @return new user ID
 	 * @throws EmailNotUniqueException
 	 * @throws UsernameNotUniqueException

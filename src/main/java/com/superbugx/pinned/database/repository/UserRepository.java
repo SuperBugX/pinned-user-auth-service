@@ -3,11 +3,11 @@ package com.superbugx.pinned.database.repository;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import com.superbugx.pinned.database.models.UserDAO;
+import com.superbugx.pinned.models.User;
 
 @Repository
-public interface UserRepository extends MongoRepository<UserDAO, String>{
-	
-	public UserDAO findByEmail(String email);
-	public UserDAO findByUsername(String username);
-}	
+public interface UserRepository extends MongoRepository<User, String> {
+
+	public User findByEmail(String email);
+	public User findByUsername(String username);
+}
