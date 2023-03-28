@@ -43,6 +43,11 @@ public class UserService implements IUserService {
 		if (newUser.getEmail() == null || newUser.getPassword() == null || newUser.getUsername() == null) {
 			throw new BadUserException("User is incomplete");
 		}
+		
+		//Trim Inputs
+		newUser.setEmail(newUser.getEmail().trim());
+		newUser.setPassword(newUser.getPassword().trim());
+		newUser.setUsername(newUser.getUsername().trim());
 
 		// Check if Username is correct
 		if (newUser.getUsername().length() < 4) {

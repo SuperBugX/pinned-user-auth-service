@@ -11,7 +11,7 @@ import com.superbugx.pinned.models.User;
 
 public interface IUserService extends UserDetailsService  {
 	/**
-	 * Create a new User account according to business logic and store into database
+	 * Create a new User account according to business logic and store into storage
 	 * 
 	 * @param newUser - User object with Email, Password, and UserName values not null
 	 * @return new user ID
@@ -25,7 +25,7 @@ public interface IUserService extends UserDetailsService  {
 	public String register(User newUser) throws EmailNotUniqueException, UsernameNotUniqueException, BadUserException;
 	
 	/**
-	 * Delete a user account from database
+	 * Delete a user account from storage
 	 * 
 	 * @param id - ID of user to be deleted
 	 * @return boolean for success
