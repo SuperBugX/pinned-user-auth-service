@@ -181,10 +181,10 @@ public class AuthenticationController {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		// Access Cookie
 		httpHeaders.add("Set-Cookie", accessTokenName + "=" + accessToken + "; Max-Age="
-				+ jwtService.getAccessTokenExpiration() + "; Path=/; HttpOnly; SameSite=Lax");
+				+ jwtService.getAccessTokenExpiration()/1000 + "; Path=/; HttpOnly; SameSite=Lax");
 		// Refresh Cookie
 		httpHeaders.add("Set-Cookie",
-				refreshTokenName + "=" + refreshToken + "; Max-Age=" + jwtService.getRefreshTokenExpiration()
+				refreshTokenName + "=" + refreshToken + "; Max-Age=" + jwtService.getRefreshTokenExpiration()/1000
 						+ "; Path=/api/authentication/refresh; HttpOnly; SameSite=Lax");
 		return httpHeaders;
 	}
