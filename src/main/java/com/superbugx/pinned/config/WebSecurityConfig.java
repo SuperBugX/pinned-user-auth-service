@@ -1,6 +1,9 @@
 package com.superbugx.pinned.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.superbugx.pinned.filters.AccessTokenEntryPoint;
 import com.superbugx.pinned.filters.AccessTokenFilter;
@@ -22,9 +28,12 @@ import com.superbugx.pinned.interfaces.services.IUserService;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-
+	//Attributes
 	@Autowired
 	private IUserService userDetailsService;
+	
+	@Value("${client.origin}")
+	private String clientOrigin;
 
 	@Bean
 	// Dependency Inject the password encoder used
@@ -60,7 +69,8 @@ public class WebSecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		// For now until we enter production, Disable CORS and CSRF
 		// Disable Spring Boot Security default login page
-		http.cors().and().csrf().disable().formLogin().disable();
+		http.cors().and().csrf().disable();
+		http.formLogin().disable();
 		//Add Routes Config
 		http.authorizeHttpRequests().requestMatchers("/api/user/register/**", "/api/authentication/login/**", "/api/authentication/refresh/**").permitAll();
 		http.authorizeHttpRequests().anyRequest().authenticated();
@@ -72,4 +82,18 @@ public class WebSecurityConfig {
 		http.addFilterBefore(accessTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
+	
+
+    @Bean
+    //CORs Config
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Arrays.asList(clientOrigin));
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }

@@ -24,117 +24,174 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class JWTService {
+	// Attributes
 	// Issuer
-	static String issuer = "pinned-auth-server";
+	private String issuer;
 
 	// Token Durations
-	private long accessTokenExpirationMs;
-	private long refreshTokenExpirationMs;
+	// In Minutes
+	private long accessTokenExpiration;
+	// In Days
+	private long refreshTokenExpiration;
 
 	// Encryption Algorithms
 	private Algorithm accessTokenAlgorithm;
 	private Algorithm refreshTokenAlgorithm;
+	// Verifiers
 	private JWTVerifier accessTokenVerifier;
 	private JWTVerifier refreshTokenVerifier;
 
-	public JWTService(@Value("${jwt.access.key}") String accessTokenSecret,
-			@Value("${jwt.refresh.key}") String refreshTokenSecret,
-			@Value("${jwt.refresh.duration}") int refreshTokenExpirationDays,
-			@Value("${jwt.access.duration}") int accessTokenExpirationMinutes) {
+	// Token
+	private DecodedJWT decodedToken;
+	private boolean isAccessToken;
 
-		//Set Attribute Values
-		//Token Duration
-		accessTokenExpirationMs = (long) accessTokenExpirationMinutes * 60 * 1000;
-		refreshTokenExpirationMs = (long) refreshTokenExpirationDays * 24 * 60 * 60 * 1000;
-		//Token Algorithms
+	public JWTService(@Value("${jwt.issuer}") String issuer, @Value("${jwt.access.key}") String accessTokenSecret,
+			@Value("${jwt.refresh.key}") String refreshTokenSecret,
+			@Value("${jwt.refresh.duration}") long refreshTokenExpirationDays,
+			@Value("${jwt.access.duration}") long accessTokenExpirationMinutes) {
+		// Default Values
+		decodedToken = null;
+		isAccessToken = false;
+
+		// Set Attribute Values
+		this.issuer = issuer;
+		// Token Duration
+		accessTokenExpiration = accessTokenExpirationMinutes * 60 * 1000;
+		refreshTokenExpiration = refreshTokenExpirationDays * 24 * 60 * 60 * 1000;
+		// Token Algorithms
 		accessTokenAlgorithm = Algorithm.HMAC512(accessTokenSecret);
 		refreshTokenAlgorithm = Algorithm.HMAC512(refreshTokenSecret);
-		//Token Verifiers
+		// Token Verifiers
 		accessTokenVerifier = JWT.require(accessTokenAlgorithm).withIssuer(issuer).build();
 		refreshTokenVerifier = JWT.require(refreshTokenAlgorithm).withIssuer(issuer).build();
 	}
 
-	//Generators
-	//Generate a new token based on a User Model
+	// Getters
+	public long getAccessTokenExpiration() {
+		return accessTokenExpiration;
+	}
+
+	public long getRefreshTokenExpiration() {
+		return refreshTokenExpiration;
+	}
+
+	// Generators
+	// Generate a new token based on a User Model
 	public String generateAccessToken(User user) {
-		//Convert Spring GrantedAuthority List to String Array
+		log.debug("Access Token Generated For : " + user.getId());
+
+		// Convert Spring GrantedAuthority List to String Array
 		List<String> stringAuthorities = new ArrayList<String>(user.getAuthorities().size());
 		user.getAuthorities().forEach(authority -> {
 			stringAuthorities.add(authority.getAuthority().toString());
 		});
-		
+
 		Date currentDate = new Date();
 		return JWT.create().withIssuer(issuer).withSubject(user.getId()).withIssuedAt(currentDate)
-				.withClaim("email", user.getEmail())
-				.withClaim("username", user.getUsername())
-				.withArrayClaim("authorities",(String[]) stringAuthorities.toArray(new String[stringAuthorities.size()]))
-				.withExpiresAt(new Date(currentDate.getTime() + accessTokenExpirationMs)).sign(accessTokenAlgorithm);
+				.withClaim("email", user.getEmail()).withClaim("username", user.getUsername())
+				.withArrayClaim("authorities",
+						(String[]) stringAuthorities.toArray(new String[stringAuthorities.size()]))
+				.withExpiresAt(new Date(currentDate.getTime() + accessTokenExpiration)).sign(accessTokenAlgorithm);
 	}
 
-	//Generate a new refresh token based on a User Model and refresh token entity
+	// Generate a new refresh token based on a User Model and refresh token entity
 	public String generateRefreshToken(User user, RefreshToken refreshToken) {
+		log.debug("Refresh Token Generated For : " + user.getId());
+
 		return JWT.create().withIssuer(issuer).withSubject(user.getId()).withClaim("tokenId", refreshToken.getId())
-				.withIssuedAt(new Date()).withExpiresAt(new Date((new Date()).getTime() + refreshTokenExpirationMs))
+				.withIssuedAt(new Date()).withExpiresAt(new Date((new Date()).getTime() + refreshTokenExpiration))
 				.sign(refreshTokenAlgorithm);
 	}
 
-	//Decoders
-	private Optional<DecodedJWT> decodeAccessToken(String token) {
+	// Decoder
+	public boolean setToken(String newToken) {
+		// Verify & Set Token
 		try {
-			return Optional.of(accessTokenVerifier.verify(token));
+			// Is Access Token
+			decodedToken = accessTokenVerifier.verify(newToken);
+			isAccessToken = true;
+			return true;
 		} catch (JWTVerificationException e) {
-			log.error("invalid access token", e);
 		}
-		return Optional.empty();
-	}
 
-	private Optional<DecodedJWT> decodeRefreshToken(String token) {
 		try {
-			return Optional.of(refreshTokenVerifier.verify(token));
+			// Is Refresh Token
+			decodedToken = refreshTokenVerifier.verify(newToken);
+			isAccessToken = false;
+			return true;
 		} catch (JWTVerificationException e) {
-			log.error("invalid refresh token", e);
 		}
-		return Optional.empty();
+
+		// Failure, Invalid Token
+		decodedToken = null;
+		isAccessToken = false;
+		return false;
 	}
 
-	//Validators
-	public boolean validateAccessToken(String token) {
-		return decodeAccessToken(token).isPresent();
+	// Validators
+	public boolean isTokenValid() {
+		return decodedToken != null;
 	}
 
-	public boolean validateRefreshToken(String token) {
-		return decodeRefreshToken(token).isPresent();
-	}
-	
-	//Expiration Checkers
-	public boolean tokenIsExpired(String token) {
-		return decodeRefreshToken(token).get().getExpiresAt().before(new Date(System.currentTimeMillis()));
-	}
-	
-	//Get Roles
-	public Collection<? extends GrantedAuthority> getRolesFromAccessToken(String token) {
-		return decodeAccessToken(token).get().getClaim("authorities").asList(SimpleGrantedAuthority.class);
+	public boolean isAccessToken() throws IllegalStateException {
+		if (isTokenValid())
+			return isAccessToken;
+		throw new IllegalStateException("Invalid Token");
 	}
 
-	//Get IDs
-	public String getUserIdFromAccessToken(String token) {
-		return decodeAccessToken(token).get().getSubject();
-	}
-	
-	public String getUserIdFromRefreshToken(String token) {
-		return decodeRefreshToken(token).get().getSubject();
+	public boolean isRefreshToken() throws IllegalStateException {
+		if (isTokenValid())
+			return !isAccessToken;
+		throw new IllegalStateException("Invalid Token");
 	}
 
-	public String getTokenIdFromRefreshToken(String token) {
-		return decodeRefreshToken(token).get().getClaim("tokenId").asString();
+	// Expiration Checker
+	public boolean tokenIsExpired() throws IllegalStateException {
+		if (isTokenValid())
+			return decodedToken.getExpiresAt().before(new Date(System.currentTimeMillis()));
+		throw new IllegalStateException("Invalid Token");
 	}
-	
-	//Claim Getters
-	public String getUsernameFromAccessToken(String token) {
-		return decodeAccessToken(token).get().getClaim("username").asString();
+
+	// Get Roles
+	public Collection<? extends GrantedAuthority> getRoles() throws IllegalStateException {
+		if (isTokenValid())
+			return decodedToken.getClaim("authorities").asList(SimpleGrantedAuthority.class);
+		throw new IllegalStateException("Invalid Token");
 	}
-	
-	public String getEmailFromAccessToken(String token) {
-		return decodeAccessToken(token).get().getClaim("email").asString();
+
+	// Get IDs
+	public Optional<String> getUserId() throws IllegalStateException {
+		if (isTokenValid())
+			return Optional.ofNullable(decodedToken.getSubject());
+		throw new IllegalStateException("Invalid Token");
+	}
+
+	public Optional<String> getTokenId() throws IllegalStateException {
+		if (isTokenValid()) {
+			if (isRefreshToken())
+				return Optional.ofNullable(decodedToken.getClaim("tokenId").asString());
+			return null;
+		} else {
+			throw new IllegalStateException("Invalid Token");
+		}
+	}
+
+	// Claim Getters
+	public Optional<String> getUsername() throws IllegalStateException {
+		if (isTokenValid())
+			return Optional.ofNullable(decodedToken.getClaim("username").asString());
+		throw new IllegalStateException("Invalid Token");
+	}
+
+	public Optional<String> getEmail() throws IllegalStateException {
+		if (isTokenValid())
+			return Optional.ofNullable(decodedToken.getClaim("email").asString());
+		throw new IllegalStateException("Invalid Token");
+	}
+
+	public Optional<String> getCustomClaim(String claim) throws IllegalStateException {
+		if (isTokenValid())
+			return Optional.ofNullable(decodedToken.getClaim(claim).asString());
+		throw new IllegalStateException("Invalid Token");
 	}
 }
