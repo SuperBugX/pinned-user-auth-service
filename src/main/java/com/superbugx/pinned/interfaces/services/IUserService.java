@@ -1,11 +1,13 @@
 package com.superbugx.pinned.interfaces.services;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.superbugx.pinned.exceptions.BadUserException;
 import com.superbugx.pinned.exceptions.EmailNotUniqueException;
+import com.superbugx.pinned.exceptions.QueryException;
 import com.superbugx.pinned.exceptions.UsernameNotUniqueException;
 import com.superbugx.pinned.models.User;
 
@@ -22,7 +24,7 @@ public interface IUserService extends UserDetailsService  {
 	 * @throws BadUserException
 	 * @throws BadUsernameException
 	 */
-	public String register(User newUser) throws EmailNotUniqueException, UsernameNotUniqueException, BadUserException;
+	public String register(User newUser) throws QueryException, EmailNotUniqueException, UsernameNotUniqueException, BadUserException;
 	
 	/**
 	 * Delete a user account from storage
@@ -38,5 +40,5 @@ public interface IUserService extends UserDetailsService  {
 	 * @return User
 	 * @throws NoSuchElementException 
 	 */
-	public User getById(String id) throws NoSuchElementException;
+	public Optional<User> getById(String id) throws QueryException;
 }
