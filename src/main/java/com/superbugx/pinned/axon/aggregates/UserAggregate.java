@@ -50,7 +50,7 @@ public class UserAggregate {
 	// Events
 	@EventSourcingHandler
 	public void on(UserCreatedEvent event) {
-		log.info("Create User Event: " + event.getUserId());
+		log.debug("Create User Event: " + event.getUserId());
 		this.id = event.getUserId();
 		this.email = event.getEmail();
 		this.password = event.getPassword();
