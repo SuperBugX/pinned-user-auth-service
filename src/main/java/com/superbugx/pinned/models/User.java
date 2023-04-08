@@ -16,35 +16,39 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Document(collection = "users")
-public class User implements UserDetails{
-	//POJO represents a single user of the system, mimics database entity
-	//Attributes
+public class User implements UserDetails {
+	// POJO represents a single user of the system, mimics database entity
+	// Attributes
 	private String id;
 	private String password;
 	private String email;
 	private String username;
 	private Collection<? extends GrantedAuthority> authorities;
-	
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		// TODO Auto-generated method stub
 		return authorities;
 	}
+
 	@Override
 	public boolean isAccountNonExpired() {
 		// TODO Auto-generated method stub
 		return true;
 	}
+
 	@Override
 	public boolean isAccountNonLocked() {
 		// TODO Auto-generated method stub
 		return true;
 	}
+
 	@Override
 	public boolean isCredentialsNonExpired() {
 		// TODO Auto-generated method stub
 		return true;
 	}
+
 	@Override
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub

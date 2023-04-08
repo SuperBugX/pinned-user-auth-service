@@ -1,0 +1,8 @@
+spring:
+  mongo:
+    token-store:
+      enabled: true
+    saga-store:
+      enabled: true
+    event-store:
+      enabled: false
